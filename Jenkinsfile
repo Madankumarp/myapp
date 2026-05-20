@@ -16,19 +16,19 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                bat 'npm install'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'npm test || true'
+                bat 'npm test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
@@ -42,10 +42,10 @@ pipeline {
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
 
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    bat '''
+                    docker login -u %DOCKER_USER% -p %DOCKER_PASS%
 
-                    docker push $IMAGE_NAME
+                    docker push %IMAGE_NAME%
                     '''
                 }
             }
@@ -60,10 +60,10 @@ pipeline {
                     credentialsId: 'aws-creds'
                 ]]) {
 
-                    sh '''
-                    aws ecs update-service \
-                    --cluster myapp-cluster-myapp \
-                    --service myapp-task-myapp-service-v3hd6hde \
+                    bat '''
+                    aws ecs update-service ^
+                    --cluster myapp-cluster-myapp ^
+                    --service myapp-task-myapp-service-v3hd6hde ^
                     --force-new-deployment
                     '''
                 }
